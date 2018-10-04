@@ -9,5 +9,6 @@ exports.ACTION = {
   DARE: "dare",
   TRUTH_AWAITINGQUESTION: "truth:awaitingquestion",
   DARE_AWAITINGQUESTION: "dare:awaitingquestion",
-  TRUTHVALIDATION: "truthvalidation"
+  TRUTHVALIDATION: "truthvalidation",
+  DAREVALIDATION: "darevalidation"
 }

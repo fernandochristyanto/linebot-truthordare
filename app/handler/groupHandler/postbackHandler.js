@@ -36,9 +36,24 @@ module.exports = async (event) => {
     case ACTION.TRUTH:
       return await handleTruthSelected(event, data)
     case ACTION.DARE:
-      return
+      return await handleDareSelected(event, data)
     case ACTION.TRUTHVALIDATION:
       return await handleTruthValidation(event, data)
+    case ACTION.DAREVALIDATION:
+      return await handleDareValidation(event, data)
+  }
+}
+
+async function handleDareValidation(event, data) {
+  const group = await db.TrGroup.findOne({ lineId: event.source.groupId })
+  const questioner = await db.TrGroupMember.findOne({ questioner: true, groupId: group.id })
+  if (questioner.lineId == event.source.userId) {
+    await client.pushMessage(group.lineId, {
+      type: MESSAGE_TYPE.TEXT,
+      text: "Game has ended!"
+    })
+    await endGame(group.lineId)
+    await client.pushMessage(group.lineId, mainMenu)
   }
 }
 
@@ -70,6 +85,21 @@ async function handleTruthSelected(event, data) {
     const targetMember = await db.TrGroupMember.findOne({ groupId: group.id, target: true })
     if (targetMember.target && targetMember.lineId == event.source.userId) { // beneran target
       group.state = ACTION.TRUTH_AWAITINGQUESTION
+      await group.save()
+
+      await client.pushMessage(event.source.groupId, onRandomizeQuestionerMessage)
+      await randomizeQuestionerAndAnnounce(event, group, targetMember)
+    }
+  }
+}
+
+async function handleDareSelected(event, data) {
+  const group = await findOneOrCreate(event.source.groupId)
+
+  if (group.state == ACTION.F2F) {
+    const targetMember = await db.TrGroupMember.findOne({ groupId: group.id, target: true })
+    if (targetMember.target && targetMember.lineId == event.source.userId) { // beneran target
+      group.state = ACTION.DARE_AWAITINGQUESTION
       await group.save()
 
       await client.pushMessage(event.source.groupId, onRandomizeQuestionerMessage)

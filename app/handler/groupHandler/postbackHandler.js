@@ -5,7 +5,7 @@ const client = require('../../client')
 const { onPlayerJoinMessage } = require('../../template/pregame/onPlayerJoinMessage')
 const { joinedPlayerListMessage } = require('../../template/pregame/joinedPlayersListMessage')
 const ObjectId = require('mongodb').ObjectId;
-
+const { MESSAGE_TYPE } = require('../../data/messagingAPI/messageType')
 module.exports = async (event) => {
   const data = extractObjectFromPostbackData(event.postback.data)
   const action = data.action
@@ -48,9 +48,42 @@ async function handleJoin(event, data) {
       lineId: userLineId,
       fullName: profile.displayName
     })
+
+    group.groupMembers.push(joinedMember)
+    await group.save()
   }
 
   return client.replyMessage(event.replyToken, onPlayerJoinMessage(profile.displayName))
+}
+
+async function handleLeave(event, data) {
+  let group = await db.TrGroup.findOne({ lineId: event.source.groupId })
+  if (!group)
+    group = await db.TrGroup.create({
+      lineId: event.source.groupId
+    })
+  const player = await db.TrGroupMember.findOne({ lineId: event.source.userId, groupId: group.id })
+
+  if (!player) {
+    // player has not joined
+    return client.replyMessage(event.replyToken, {
+      type: MESSAGE_TYPE.TEXT,
+      text: "Player has not joined the game"
+    })
+  }
+  else {
+    // remove player
+    client.replyMessage(event.replyToken, {
+      type: MESSAGE_TYPE.TEXT,
+      text: `${player.fullName} has left the game.`
+    })
+
+    group.groupMembers.remove(player)
+    await group.save()
+    await db.TrGroupMember.remove({
+      lineId: event.source.userId
+    })
+  }
 }
 
 async function handleListAllPlayers(event) {

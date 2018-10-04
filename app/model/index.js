@@ -8,5 +8,6 @@ mongoose.connect(config.mongodbUri || "mongodb://localhost:27017/linebot-truth-o
 });
 
 module.exports = {
-  
+  TrGroup: require('./trGroup'),
+  TrGroupMember: require('./trGroupMember')
 }

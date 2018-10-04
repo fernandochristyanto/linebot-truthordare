@@ -14,8 +14,8 @@ module.exports = async (event) => {
       return client.replyMessage(event.replyToken, mainMenu)
     }
     else {
-      if (group.state)
-        return null
+      // if (group.state)
+      //   return null
       return client.replyMessage(event.replyToken, mainMenu)
     }
   }

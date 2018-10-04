@@ -39,12 +39,14 @@ async function handleJoin(event, data) {
     group = await db.TrGroup.create({ lineId: groupLineId })
 
   let joinedMember = await db.TrGroupMember.findOne({ groupId: group.id, lineId: userLineId })
+  const profile = await client.getProfile(userLineId);
   if (!joinedMember) {
     joinedMember = await db.TrGroupMember.create({
       groupId: group.id,
-      lineId: userLineId
+      lineId: userLineId,
+      fullName: profile.displayName
     })
   }
 
-  return client.replyMessage(event.replyToken, onPlayerJoinMessage)
+  return client.replyMessage(event.replyToken, onPlayerJoinMessage(profile.displayName))
 }

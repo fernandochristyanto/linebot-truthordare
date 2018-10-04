@@ -57,7 +57,7 @@ async function f2fOrldr(event, data) {
     await group.save()
 
     // Push message to group
-    client.pushMessage(groupLineId, onRandomizePlayerMessage)
+    await client.pushMessage(groupLineId, onRandomizePlayerMessage)
 
     await randomizeTargetAndAnnounce(event, group)
   }

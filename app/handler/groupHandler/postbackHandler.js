@@ -43,12 +43,16 @@ module.exports = async (event) => {
 
 async function handleTruthSelected(event, data) {
   const group = await findOneOrCreate(event.source.groupId)
-  const targetMember = await db.TrGroupMember.findOne({ groupId: group.id, target: true })
-  if (targetMember.target) { // beneran target
-    group.state = ACTION.TRUTH_AWAITINGQUESTION
-    await group.save()
 
-    await client.pushMessage(event.source.groupId, onRandomizeQuestionerMessage)
+  if (group.state == ACTION.LDR || group.state == ACTION.F2F) {
+    const targetMember = await db.TrGroupMember.findOne({ groupId: group.id, target: true })
+    if (targetMember.target && targetMember.lineId == event.source.userId) { // beneran target
+      group.state = ACTION.TRUTH_AWAITINGQUESTION
+      await group.save()
+
+      await client.pushMessage(event.source.groupId, onRandomizeQuestionerMessage)
+      await randomizeQuestionerAndAnnounce(event, group, targetMember)
+    }
   }
 }
 

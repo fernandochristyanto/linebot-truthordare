@@ -4,7 +4,7 @@ const db = require('../../model')
 const client = require('../../client')
 const { onPlayerJoinMessage } = require('../../template/pregame/onPlayerJoinMessage')
 const { joinedPlayerListMessage } = require('../../template/pregame/joinedPlayersListMessage')
-const ObjectId = require('mongoose').ObjectId
+const ObjectId = require('mongodb').ObjectId;
 
 module.exports = async (event) => {
   const data = extractObjectFromPostbackData(event.postback.data)

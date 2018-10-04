@@ -44,7 +44,7 @@ module.exports = async (event) => {
 
 async function handleTruthValidation(event, data) {
   const group = await db.TrGroup.findOne({ lineId: event.source.groupId })
-  if (data.valid) {
+  if (data.valid == 'true') {
     await client.pushMessage(group.lineId, {
       type: MESSAGE_TYPE.TEXT,
       text: "Game has ended!"

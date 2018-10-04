@@ -6,7 +6,7 @@ const config = require('../../../config')
 module.exports = async (event) => {
   if (event.message.text.toLowerCase() == config.botName) {
     const groupLineId = event.source.groupId
-    const group = await db.TrGroup.findOne({ lineId: groupline })
+    const group = await db.TrGroup.findOne({ lineId: groupLineId })
     if (!group) {
       await db.TrGroup.create({
         lineId: groupLineId

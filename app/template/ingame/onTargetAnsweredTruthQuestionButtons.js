@@ -10,7 +10,7 @@ exports.onTargetAnsweredTruthQuestionButtons = {
         data: 'action=truthvalidation&valid=true'
       },
       {
-        type: 'message',
+        type: 'postback',
         label: 'No',
         data: 'action=truthvalidation&valid=false'
       }

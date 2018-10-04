@@ -43,22 +43,24 @@ async function f2fOrldr(event, data) {
   const groupLineId = event.source.groupId
   const group = await findOneOrCreate(groupLineId)
 
-  switch (data.action) {
-    case ACTION.F2F:
-      group.state = ACTION.F2F
-      break;
-    case ACTION.LDR:
-      group.state = ACTION.LDR
-      break;
+  if (!group.state) {
+    switch (data.action) {
+      case ACTION.F2F:
+        group.state = ACTION.F2F
+        break;
+      case ACTION.LDR:
+        group.state = ACTION.LDR
+        break;
+    }
+
+    group.ingame = true
+    await group.save()
+
+    // Push message to group
+    client.pushMessage(groupLineId, onRandomizePlayerMessage)
+
+    await randomizeTargetAndAnnounce(event, group)
   }
-
-  group.ingame = true
-  await group.save()
-
-  // Push message to group
-  client.pushMessage(groupLineId, onRandomizePlayerMessage)
-
-  await randomizeTargetAndAnnounce(event, group)
 }
 
 async function randomizeTargetAndAnnounce(event, group) {

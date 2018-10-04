@@ -12,7 +12,7 @@ exports.dareValidationButtons = (questioner) => {
         },
       ],
       title: `${questioner.fullName}`,
-      text: "Has the target finished his / her challange?\n\nClick \"Done\" if the target has done the challange"
+      text: "Click \"Done\" if the target has done the challange"
     }
   }
 }

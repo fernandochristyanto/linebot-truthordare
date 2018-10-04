@@ -64,7 +64,7 @@ async function f2fOrldr(event, data) {
 async function randomizeTargetAndAnnounce(event, group) {
   const joinedGroupMembers = await db.TrGroupMember.find({ groupId: group.id })
   const randomTargetIndex = Math.floor(Math.random() * joinedGroupMembers.length)
-  const chosenTarget = joinedGroupMembers[randomizeTargetAndAnnounce]
+  const chosenTarget = joinedGroupMembers[randomTargetIndex]
   chosenTarget.target = true;
   await chosenTarget.save()
 

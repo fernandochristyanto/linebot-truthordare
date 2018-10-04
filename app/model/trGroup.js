@@ -12,7 +12,10 @@ const trGroup = new mongoose.Schema({
   groupMembers: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'TrGroupMember'
-  }]
+  }],
+  state: {
+    type: String
+  }
 }, {
     timestamps: true
   });

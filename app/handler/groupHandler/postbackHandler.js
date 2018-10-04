@@ -2,7 +2,7 @@ const { extractObjectFromPostbackData } = require('../../service/data')
 const { ACTION } = require('../../data/action')
 const db = require('../../model')
 const client = require('../../client')
-const { onPlayerJoinMessage  } = require('../../template/pregame/onPlayerJoinMessage')
+const { onPlayerJoinMessage } = require('../../template/pregame/onPlayerJoinMessage')
 
 module.exports = async (event) => {
   const data = extractObjectFromPostbackData(event.postback.data)
@@ -46,5 +46,5 @@ async function handleJoin(event, data) {
     })
   }
 
-  return client.replyMessage(event.replyToken)
+  return client.replyMessage(event.replyToken, onPlayerJoinMessage)
 }

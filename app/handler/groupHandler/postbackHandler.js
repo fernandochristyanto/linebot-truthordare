@@ -8,6 +8,8 @@ const ObjectId = require('mongodb').ObjectId;
 const { MESSAGE_TYPE } = require('../../data/messagingAPI/messageType')
 const { findOneOrCreate } = require('../../service/trGroup')
 const { startingGameButtons } = require('../../template/pregame/startingGameButtons')
+const { onRandomizePlayerMessage } = require('../../template/ingame/onRandomizeTargetMessage')
+const { onTargetRandomizedButtons } = require('../../template/ingame/onTargetRandomizedButtons')
 
 const MINIMAL_JOIN_PLAYER = 3;
 
@@ -25,9 +27,9 @@ module.exports = async (event) => {
     case ACTION.PLAY:
       return await handlePlayAGame(event)
     case ACTION.F2F:
-      return;
+      return await f2fOrldr(event, data)
     case ACTION.LDR:
-      return;
+      return await f2fOrldr(event, data)
     case ACTION.TRUTH:
       return;
     case ACTION.DARE:
@@ -35,6 +37,43 @@ module.exports = async (event) => {
     case ACTION.TRUTHVALIDATION:
       return
   }
+}
+
+async function f2fOrldr(event, data) {
+  const groupLineId = event.source.groupId
+  const group = await findOneOrCreate(groupLineId)
+
+  switch (data.action) {
+    case ACTION.F2F:
+      group.state = ACTION.F2F
+      break;
+    case ACTION.LDR:
+      group.state = ACTION.LDR
+      break;
+  }
+
+  group.ingame = true
+  await group.save()
+
+  // Push message to group
+  client.pushMessage(groupLineId, onRandomizePlayerMessage)
+
+  await randomizeTargetAndAnnounce(event, group)
+}
+
+async function randomizeTargetAndAnnounce(event, group) {
+  const joinedGroupMembers = await db.TrGroupMember.find({ groupId: group.id })
+  const randomTargetIndex = Math.floor(Math.random() * joinedGroupMembers.length)
+  const chosenTarget = joinedGroupMembers[randomizeTargetAndAnnounce]
+  chosenTarget.target = true;
+  await chosenTarget.save()
+
+  // send reply with options: truth / dare (if f2f)
+  const isOffline = (group) => {
+    return group.state = ACTION.F2F
+  }
+
+  client.pushMessage(group.lineId, onTargetRandomizedButtons(chosenTarget, isOffline(group)))
 }
 
 async function handlePlayAGame(event) {

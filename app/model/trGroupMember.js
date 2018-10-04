@@ -12,6 +12,9 @@ const trGroupMember = new mongoose.Schema({
   lineId: {
     type: String,
     required: true
+  },
+  target: {
+    type: Boolean
   }
 }, {
     timestamps: true

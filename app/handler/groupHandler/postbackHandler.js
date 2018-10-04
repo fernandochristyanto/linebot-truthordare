@@ -14,7 +14,7 @@ module.exports = async (event) => {
     case ACTION.JOIN:
       return await handleJoin(event, data);
     case ACTION.LEAVE:
-      return;
+      return await handleLeave(event, data)
     case ACTION.LISTOFPLAYER:
       return await handleListAllPlayers(event);
     case ACTION.PLAY:

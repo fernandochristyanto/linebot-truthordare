@@ -7,6 +7,10 @@ const { joinedPlayerListMessage } = require('../../template/pregame/joinedPlayer
 const ObjectId = require('mongodb').ObjectId;
 const { MESSAGE_TYPE } = require('../../data/messagingAPI/messageType')
 const { findOneOrCreate } = require('../../service/trGroup')
+const { startingGameButtons } = require('../../template/pregame/startingGameButtons')
+
+const MINIMAL_JOIN_PLAYER = 3;
+
 module.exports = async (event) => {
   const data = extractObjectFromPostbackData(event.postback.data)
   const action = data.action
@@ -19,7 +23,7 @@ module.exports = async (event) => {
     case ACTION.LISTOFPLAYER:
       return await handleListAllPlayers(event);
     case ACTION.PLAY:
-      return;
+      return await handlePlayAGame(event)
     case ACTION.F2F:
       return;
     case ACTION.LDR:
@@ -33,13 +37,30 @@ module.exports = async (event) => {
   }
 }
 
+async function handlePlayAGame(event) {
+  const group = await findOneOrCreate(event.source.groupId)
+  const joinedMembers = await db.TrGroupMember.find({ groupId: group.id })
+  if (group.ingame)
+    return null
+
+  if (joinedMembers.length < MINIMAL_JOIN_PLAYER) {
+    return client.replyMessage(event.replyToken, {
+      type: MESSAGE_TYPE.TEXT,
+      text: `Minimum player to start a game is 3. Only ${joinedMembers.length} has joined.`
+    })
+  }
+  else {
+    return client.replyMessage(event.replyToken, startingGameButtons)
+  }
+}
+
 async function handleJoin(event, data) {
   const userLineId = event.source.userId
   const groupLineId = event.source.groupId
 
   let group = await findOneOrCreate(groupLineId)
 
-  if(group.ingame)
+  if (group.ingame)
     return null;
 
   let joinedMember = await db.TrGroupMember.findOne({ groupId: group.id, lineId: userLineId })
@@ -61,9 +82,9 @@ async function handleJoin(event, data) {
 async function handleLeave(event, data) {
   let group = await findOneOrCreate(event.source.groupId)
 
-  if(group.ingame)
+  if (group.ingame)
     return null;
-    
+
   const player = await db.TrGroupMember.findOne({ lineId: event.source.userId, groupId: group.id })
 
   if (!player) {

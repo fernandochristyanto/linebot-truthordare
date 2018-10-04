@@ -6,6 +6,7 @@ const { ACTION } = require('../../data/action')
 const { findOneOrCreate } = require('../../service/trGroup')
 const { MESSAGE_TYPE } = require('../../data/messagingAPI/messageType')
 const { onTargetAnsweredTruthQuestionButtons } = require('../../template/ingame/onTargetAnsweredTruthQuestionButtons')
+const { dareValidationButtons } = require('../../template/ingame/dareValidationButtons')
 
 module.exports = async (event) => {
   const group = await findOneOrCreate(event.source.groupId)
@@ -39,6 +40,7 @@ async function handleDareAwaitingQuestion(event, group) {
       type: MESSAGE_TYPE.TEXT,
       text: `Challange : ${question}\n\n${target.fullName}, finish the challange given...`
     })
+    await client.pushMessage(event.source.groupId, dareValidationButtons(questioner))
   }
 }
 

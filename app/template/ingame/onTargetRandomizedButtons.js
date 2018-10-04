@@ -5,7 +5,7 @@ exports.onTargetRandomizedButtons = (targetPlayer, isOffline) => {
     template: {
       type: 'buttons',
       actions: getButtonsArray(targetPlayer, isOffline),
-      title: 'Player Name',
+      title: `${targetPlayer.fullName}`,
       text: getText(isOffline)
     }
   }

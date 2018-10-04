@@ -72,7 +72,7 @@ async function randomizeTargetAndAnnounce(event, group) {
 
   // send reply with options: truth / dare (if f2f)
   const isOffline = (group) => {
-    return group.state = ACTION.F2F
+    return group.state == ACTION.F2F
   }
 
   client.pushMessage(group.lineId, onTargetRandomizedButtons(chosenTarget, isOffline(group)))

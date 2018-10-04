@@ -5,11 +5,14 @@ const config = require('../../../config')
 const { ACTION } = require('../../data/action')
 const { findOneOrCreate } = require('../../service/trGroup')
 const { MESSAGE_TYPE } = require('../../data/messagingAPI/messageType')
+const { onTargetAnsweredTruthQuestionButtons } = require('../../template/ingame/onTargetAnsweredTruthQuestionButtons')
 
 module.exports = async (event) => {
   const group = await findOneOrCreate(event.source.groupId)
   if (group.state) {
     switch (group.state) {
+      case ACTION.TRUTH:
+        return await handleTruthAnswer(event, group)
       case ACTION.TRUTH_AWAITINGQUESTION:
         return await handleTruthAwaitingQuestion(event, group)
       case ACTION.DARE_AWAITINGQUESTION:
@@ -20,6 +23,16 @@ module.exports = async (event) => {
   }
 }
 
+async function handleTruthAnswer(event, group) {
+  const userSenderLineId = event.source.userId
+  const target = await db.TrGroupMember.findOne({ groupId: group.id, target: true })
+  if (target.lineId == userSenderLineId) {
+    group.state = ACTION.TRUTHVALIDATION
+    await group.save()
+
+    client.pushMessage(group.lineId, onTargetAnsweredTruthQuestionButtons)
+  }
+}
 
 async function handleTruthAwaitingQuestion(event, group) {
   const userSenderLineId = event.source.userId

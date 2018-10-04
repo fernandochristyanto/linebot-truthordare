@@ -12,7 +12,7 @@ exports.onTargetAnsweredTruthQuestionButtons = {
       {
         type: 'message',
         label: 'No',
-        data: 'action=truthvalidation&valid=true'
+        data: 'action=truthvalidation&valid=false'
       }
     ],
     text: 'Did your friend tell the truth?'

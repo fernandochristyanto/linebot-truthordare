@@ -54,6 +54,11 @@ async function handleJoin(event, data) {
 }
 
 async function handleListAllPlayers(event) {
-  const joinedPlayers = await db.TrGroupMember.find({ groupId: new ObjectId(event.source.groupId) })
+  let group = await db.TrGroup.findOne({ lineId: event.source.groupId })
+  if (!group)
+    group = await db.TrGroup.create({
+      lineId: event.source.groupId
+    })
+  const joinedPlayers = await db.TrGroupMember.find({ groupId: group.id })
   return client.replyMessage(event.replyToken, joinedPlayerListMessage(joinedPlayers))
 }

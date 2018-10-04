@@ -15,6 +15,9 @@ const trGroup = new mongoose.Schema({
   }],
   state: {
     type: String
+  },
+  question: {
+    type: String
   }
 }, {
     timestamps: true

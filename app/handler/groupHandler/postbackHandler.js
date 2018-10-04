@@ -56,7 +56,7 @@ async function handleJoin(event, data) {
 }
 
 async function handleLeave(event, data) {
-  let group = await findOneOrCreate(groupLineId)
+  let group = await findOneOrCreate(event.source.groupId)
   const player = await db.TrGroupMember.findOne({ lineId: event.source.userId, groupId: group.id })
 
   if (!player) {
@@ -82,7 +82,7 @@ async function handleLeave(event, data) {
 }
 
 async function handleListAllPlayers(event) {
-  let group = await findOneOrCreate(groupLineId)
+  let group = await findOneOrCreate(event.source.groupId)
   const joinedPlayers = await db.TrGroupMember.find({ groupId: group.id })
   return client.replyMessage(event.replyToken, joinedPlayerListMessage(joinedPlayers))
 }

@@ -6,12 +6,13 @@ const { onPlayerJoinMessage } = require('../../template/pregame/onPlayerJoinMess
 const { joinedPlayerListMessage } = require('../../template/pregame/joinedPlayersListMessage')
 const ObjectId = require('mongodb').ObjectId;
 const { MESSAGE_TYPE } = require('../../data/messagingAPI/messageType')
-const { findOneOrCreate } = require('../../service/trGroup')
+const { findOneOrCreate, endGame } = require('../../service/trGroup')
 const { startingGameButtons } = require('../../template/pregame/startingGameButtons')
 const { onRandomizePlayerMessage } = require('../../template/ingame/onRandomizeTargetMessage')
 const { onTargetRandomizedButtons } = require('../../template/ingame/onTargetRandomizedButtons')
 const { onRandomizeQuestionerMessage } = require('../../template/ingame/onRandomizeQuestionerMessage')
 const { onQuestionerRandomizedMessage } = require('../../template/ingame/onQuestionerRandomizedMessage')
+const { mainMenu } = require('../../template/pregame/mainMenuButtons')
 
 const MINIMAL_JOIN_PLAYER = 3;
 
@@ -37,7 +38,28 @@ module.exports = async (event) => {
     case ACTION.DARE:
       return
     case ACTION.TRUTHVALIDATION:
-      return
+      return await handleTruthValidation(event, data)
+  }
+}
+
+async function handleTruthValidation(event, data) {
+  const group = await db.TrGroup.findOne({ lineId: event.source.groupId })
+  if (data.valid) {
+    await client.pushMessage(group.lineId, {
+      type: MESSAGE_TYPE.TEXT,
+      text: "Game has ended!"
+    })
+    await endGame(group.lineId)
+    await client.pushMessage(group.lineId, mainMenu)
+  }
+  else {
+    group.state = ACTION.TRUTH
+    await group.save()
+    await client.pushMessage(group.lineId, {
+      type: MESSAGE_TYPE.TEXT,
+      text: "Answer is not acceptable, we are still waiting for your answer..."
+    })
+    client.pushMessage(group.lineId, onTargetAnsweredTruthQuestionButtons)
   }
 }
 

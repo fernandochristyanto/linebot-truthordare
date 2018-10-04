@@ -10,6 +10,8 @@ const { findOneOrCreate } = require('../../service/trGroup')
 const { startingGameButtons } = require('../../template/pregame/startingGameButtons')
 const { onRandomizePlayerMessage } = require('../../template/ingame/onRandomizeTargetMessage')
 const { onTargetRandomizedButtons } = require('../../template/ingame/onTargetRandomizedButtons')
+const { onRandomizeQuestionerMessage } = require('../../template/ingame/onRandomizeQuestionerMessage')
+const { onQuestionerRandomizedMessage } = require('../../template/ingame/onQuestionerRandomizedMessage')
 
 const MINIMAL_JOIN_PLAYER = 3;
 
@@ -31,12 +33,37 @@ module.exports = async (event) => {
     case ACTION.LDR:
       return await f2fOrldr(event, data)
     case ACTION.TRUTH:
-      return;
+      return await handleTruthSelected(event, data)
     case ACTION.DARE:
       return
     case ACTION.TRUTHVALIDATION:
       return
   }
+}
+
+async function handleTruthSelected(event, data) {
+  const group = await findOneOrCreate(event.source.groupId)
+  const targetMember = await db.TrGroupMember.findOne({ groupId: group.id, target: true })
+  if (targetMember.target) { // beneran target
+    group.state = ACTION.TRUTH_AWAITINGQUESTION
+    await group.save()
+
+    await client.pushMessage(event.source.groupId, onRandomizeQuestionerMessage)
+  }
+}
+
+async function randomizeQuestionerAndAnnounce(event, group, target) {
+  const remainingGroupMembers = await db.TrGroupMember.find({
+    groupId: group.id,
+    $or: [{ target: false }, { target: undefined }]
+  })
+
+  const randomQuestionerIndex = Math.floor(Math.random() * remainingGroupMembers.length)
+  const questioner = remainingGroupMembers[randomQuestionerIndex]
+  questioner.questioner = true
+  await questioner.save()
+
+  await client.pushMessage(event.source.groupId, onQuestionerRandomizedMessage(questioner, target))
 }
 
 async function f2fOrldr(event, data) {

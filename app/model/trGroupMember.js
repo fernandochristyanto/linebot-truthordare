@@ -15,6 +15,9 @@ const trGroupMember = new mongoose.Schema({
   },
   target: {
     type: Boolean
+  },
+  questioner: {
+    type: Boolean
   }
 }, {
     timestamps: true

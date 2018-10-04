@@ -3,6 +3,8 @@ const { ACTION } = require('../../data/action')
 const db = require('../../model')
 const client = require('../../client')
 const { onPlayerJoinMessage } = require('../../template/pregame/onPlayerJoinMessage')
+const { joinedPlayerListMessage } = require('../../template/pregame/joinedPlayersListMessage')
+const ObjectId = require('mongoose').ObjectId
 
 module.exports = async (event) => {
   const data = extractObjectFromPostbackData(event.postback.data)
@@ -14,7 +16,7 @@ module.exports = async (event) => {
     case ACTION.LEAVE:
       return;
     case ACTION.LISTOFPLAYER:
-      return;
+      return await handleListAllPlayers(event);
     case ACTION.PLAY:
       return;
     case ACTION.F2F:
@@ -40,7 +42,6 @@ async function handleJoin(event, data) {
 
   let joinedMember = await db.TrGroupMember.findOne({ groupId: group.id, lineId: userLineId })
   const profile = await client.getProfile(userLineId);
-  console.log(joinedMember)
   if (!joinedMember) {
     joinedMember = await db.TrGroupMember.create({
       groupId: group.id,
@@ -50,4 +51,9 @@ async function handleJoin(event, data) {
   }
 
   return client.replyMessage(event.replyToken, onPlayerJoinMessage(profile.displayName))
+}
+
+async function handleListAllPlayers(event) {
+  const joinedPlayers = await db.TrGroupMember.find({ groupId: new ObjectId(event.source.groupId) })
+  return client.replyMessage(event.replyToken, joinedPlayerListMessage(joinedPlayers))
 }

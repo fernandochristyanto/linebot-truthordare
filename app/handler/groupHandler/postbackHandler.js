@@ -41,7 +41,7 @@ async function handleJoin(event, data) {
   let joinedMember = await db.TrGroupMember.findOne({ groupId: group.id, lineId: userLineId })
   const profile = await client.getProfile(userLineId);
   console.log(joinedMember)
-  if (joinedMember == false) {
+  if (!joinedMember) {
     joinedMember = await db.TrGroupMember.create({
       groupId: group.id,
       lineId: userLineId,

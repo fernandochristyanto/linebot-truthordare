@@ -13,5 +13,7 @@ exports.findOneOrCreate = async (groupLineId) => {
 exports.endGame = async (groupLineId) => {
   let group = await db.TrGroup.findOne({ lineId: groupLineId })
   group.state = undefined;
-  await db.TrGroupMember.update({ group: group.id }, { target: undefined, questioner: undefined }, { multi: true })
+  group.question = undefined
+  await group.save()
+  await db.TrGroupMember.update({ groupId: group.id }, { target: undefined, questioner: undefined }, { multi: true })
 }
